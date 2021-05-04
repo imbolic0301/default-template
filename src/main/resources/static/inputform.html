@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="">
+	<meta name="author" content="">
+	<title>ProRata Art - Admin</title>
+    <script src="//code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdn.ckeditor.com/ckeditor5/27.1.0/classic/ckeditor.js"></script>
+    
+</head>
+
+<body>
+	<form id="mainform" class="form-horizontal" role="form" style="margin:10px;">
+
+		<div class="panel panel-primary">
+			<div class="panel-heading">
+				<h4 class="panel-title" id="contactLabel">Landing Page</h4>
+			</div>
+			<div class="modal-body" style="padding: 5px;">
+				<div class="row">
+					<div class="col-lg-12 col-md-12 col-sm-12" style="padding-bottom: 10px;">
+						<label for="inputCategory" class="control-label">Category</label>
+						<input id="category" class="form-control" name="category" placeholder="Category" type="text" />
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-lg-12 col-md-12 col-sm-12" style="padding-bottom: 10px;">
+						<label for="inputCategory" class="control-label">InfoId</label>
+						<input id="infoId" class="form-control" name="infoId" placeholder="InfoId" type="text" />
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-lg-12 col-md-12 col-sm-12" style="padding-bottom: 10px;">
+						<label for="inputSubject" class="control-label">Subject</label>
+						<input id="subject" class="form-control" name="subject" placeholder="Subject" type="text" />
+					</div>
+				</div>
+				<!-- <div class="row">
+					<div class="col-lg-12 col-md-12 col-sm-12">
+						<label for="inputContent" class="control-label">Contents</label>
+						<textarea id="content" style="resize:vertical;" class="form-control" placeholder="Contents..." rows="6" name="content"></textarea>
+					</div>
+				</div> -->
+				
+			    <div id="editor">
+			        <p>This is some sample content.</p>
+			    </div>
+			    <script>
+					var myEditor;
+				    ClassicEditor
+				    	.create( document.querySelector( '#editor' ) )
+				    	.then( editor => {
+				    	    console.log( 'Editor was initialized', editor );
+				    	    myEditor = editor;
+				  		  } )
+				        .catch( error => {
+				            console.error( error );
+				        } );
+			    </script>
+			  
+
+			</div>
+			<div class="panel-footer" style="height:55px;">
+				<input type="submit" class="btn btn-success" style="width:100px;" value="Save"/>
+				<button id="close-btn" style="width:100px;float: right;" type="button" class="btn btn-warning btn-close" data-dismiss="modal">Close</button>
+			</div>
+		</div>
+
+	</form>
+</body>
+
+<script type="text/javascript">
+
+
+var id = getParam("id");
+     
+	 function getDataFromTheEditor() {
+         return myEditor.getData();
+       }
+	var content = getDataFromTheEditor();
+	/* $(document).ready(function() {
+		$('#close-btn').click(function (e) {
+			window.close();
+		});
+	}); */
+
+	$("#mainform").submit(function(e) {
+		$.ajax({
+			async : false,
+			url : "/api/board/",
+			type : "post",
+			contentType: false,
+			processData: false,
+			cache : false,
+			async : false,
+			data : JSON.stringify({
+				category:$('#category').val(),
+				title:$('#subject').val(),
+				infoId:$('#infoId').val(),
+				content:content
+			}),
+			contentType: "application/json; charset=utf-8",
+			success : function(data) {
+				alert("등록하였습니다.");
+				window.close();
+			},
+			error : function(data) {
+				errorResultPopup(data);
+			}
+		});
+
+		e.preventDefault(e);
+	});
+
+	function getParam(param){
+		return new URLSearchParams(location.search).get(param);
+	}
+</script>
+</html>
