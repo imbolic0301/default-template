@@ -1,7 +1,9 @@
 package com.example.service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
@@ -15,7 +17,7 @@ import com.example.domain.BoardEntity;
 import com.example.domain.BoardInfoEntity;
 import com.example.mapper.BoardInfoMapper;
 import com.example.mapper.BoardMapper;
-import com.example.mapper.BoardReplyMapper;
+import com.example.web.dto.BoardDTO;
 
 @Service
 public class BoardService {
@@ -26,9 +28,6 @@ public class BoardService {
 	@Autowired
 	private BoardMapper boardMapper;
 	
-	@Autowired
-	private BoardReplyMapper boardReplyMapper;
-	
 	private List<BoardInfoEntity> infoEntity;
 	
 	//추후 redis를 이용한 local cache에서 값을 가져오는 코드로 수정 필요
@@ -38,43 +37,45 @@ public class BoardService {
 	}
 	
 	@Transactional(readOnly = true)
-	public List<BoardEntity> getBoardListByInfoId(Integer infoId) throws Exception {
-		boardInfoReadExceptionCheck(infoId);
-		return boardMapper.getBoardListByInfoId(infoId);
+	public List<BoardDTO.BoardResponse> getBoardListByInfoId(Integer infoId, Integer page, Integer size) throws Exception {
+		checkBoardInfoReadException(infoId);
+		return Optional.ofNullable(boardMapper.getBoardListByInfoId(infoId, page, size)).orElseGet(Collections::emptyList)
+				.stream()
+				.map(e -> new BoardDTO.BoardResponse(e))
+				.collect(Collectors.toList());
 	}
 	
 	@Transactional(readOnly = true)
 	public BoardEntity getBoardById(Long id) throws Exception {
 		BoardEntity entity = boardMapper.getBoardById(id);
 		checkBoardException(entity);
-		boardInfoReadExceptionCheck(entity.getInfoId());
-		entity.setReplyList(boardReplyMapper.getBoardReplyListByBoardId(id));
+		checkBoardInfoReadException(entity.getInfoId());
 		return entity;
 	}
+	
 	@Transactional(readOnly = false, isolation = Isolation.REPEATABLE_READ, propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 	public void createBoard(BoardEntity entity) throws Exception {
-		boardInfoWriteExceptionCheck(entity.getInfoId());
+		checkBoardInfoWriteException(entity.getInfoId());
 		boardMapper.createBoard(entity);
 	}
 	
 	@Transactional(readOnly = false, isolation = Isolation.REPEATABLE_READ, propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 	public void updateBoard(BoardEntity entity) throws Exception {
-		boardInfoWriteExceptionCheck(entity.getInfoId());
+		checkBoardInfoWriteException(entity.getInfoId());
 		boardMapper.updateBoard(entity);
 	}
 	
 	
-	public void boardInfoReadExceptionCheck(Integer infoId) throws Exception {
+	public void checkBoardInfoReadException(Integer infoId) throws Exception {
 		checkBoardInfoException(infoId, false, false);
 	}
 	
-	public void boardInfoWriteExceptionCheck(Integer infoId) throws Exception {
+	public void checkBoardInfoWriteException(Integer infoId) throws Exception {
 		checkBoardInfoException(infoId, true, true);
 	}
 	
 	//로컬 캐시에 저장된 info entity의 정보를 이용해 오류체크하는 메소드, 타 서비스에서의 호출을 허용하기 위한 public 선언
 	public void checkBoardInfoException(Integer boardInfoId, Boolean isAdminCheck, Boolean isWrite) throws Exception {
-		infoEntity.stream().forEach(e-> System.out.print(e));
 		Optional<BoardInfoEntity> info = infoEntity.stream().filter(e -> e.getId().equals(boardInfoId)).findFirst();
 		if(info.isEmpty()) {
 			throw new Exception("찾을 수 없는 게시판");

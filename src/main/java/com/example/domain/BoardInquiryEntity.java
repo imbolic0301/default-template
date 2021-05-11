@@ -1,7 +1,6 @@
 package com.example.domain;
 
 import java.time.ZonedDateTime;
-import java.util.List;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -24,9 +23,8 @@ public class BoardInquiryEntity {
 	private String content;
 	private String answer;
 	private Long parentId;
+	private Long originId;
 	private Boolean isDel;
 	private ZonedDateTime regDt;
 	private ZonedDateTime modDt; 
-	
-	private List<BoardInquiryEntity> subInquiryList;
 }

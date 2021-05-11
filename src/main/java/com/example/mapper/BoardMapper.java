@@ -13,10 +13,12 @@ import com.example.domain.BoardEntity;
 @Repository
 public interface BoardMapper {
 	
-	@Select("")
-	List<BoardEntity> getBoardListByInfoId(@Param("infoId") Integer infoId);
+	@Select("SELECT * FROM board WHERE info_id = #{infoId} ORDER BY reg_dt DESC LIMIT #{skip}, #{size}")
+	List<BoardEntity> getBoardListByInfoId(
+			@Param("infoId") Integer infoId, 
+			@Param("skip") Integer skip, @Param("size") Integer size);
 	
-	@Select("")
+	@Select("SELECT * FROM board WHERE id = #{id}")
 	BoardEntity getBoardById(@Param("id") Long id);
 	
 	@Insert(""
@@ -35,10 +37,15 @@ public interface BoardMapper {
 			+ ")")
 	void createBoard(BoardEntity entity);
 	
-	@Update("")
+	@Update(""
+			+ "	UPDATE board"
+			+ "	SET"
+			+ "		title = IFNULL(#{title}, title), "
+			+ "		content = IFNULL(#{content}, content) "
+			+ "	WHERE id = #{id}")
 	void updateBoard(BoardEntity entity);
 	
-	@Update("")
+	@Update("UPDATE board SET is_del = 1 AND mod_dt = now()")
 	void remove(Long id);
 	
 }

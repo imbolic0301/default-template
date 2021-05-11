@@ -1,9 +1,9 @@
 package com.example.service;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.domain.BoardInquiryEntity;
 import com.example.mapper.BoardInquiryMapper;
+import com.example.web.dto.BoardInquiryDTO.InquiryResponse;
 
 @Service
 public class BoardInquiryService {
@@ -22,54 +23,42 @@ public class BoardInquiryService {
 	
 	
 	@Transactional(readOnly = true)
-	public BoardInquiryEntity getBoardInquiryListById(Integer id) {
-		return boardInquiryMapper.getBoardInquiryListById(id);
+	public InquiryResponse getBoardInquiryById(Long id) {
+		InquiryResponse result = new InquiryResponse(boardInquiryMapper.getBoardInquiryListById(id));
+		if(result != null) {
+			result.setSubInquiryList(
+				Optional.ofNullable(boardInquiryMapper.getBoardInquiryListByOriginIdList(result.getOriginId())).orElseGet(Collections::emptyList)
+					.stream()
+					.map(e -> new InquiryResponse(e))
+					.collect(Collectors.toList())
+			);
+			
+		}
+		
+		return result;
 	}
 	
 	@Transactional(readOnly = true)
-	public List<BoardInquiryEntity> getBoardInquiryListByType(Integer type) {
-		List<BoardInquiryEntity> boardList = boardInquiryMapper.getBoardInquiryListByType(type);
-		
-		Map<Long, List<BoardInquiryEntity>> subInquiryMap = new LinkedHashMap<>();
-		List<Long> idList = new LinkedList<>();
-		for(BoardInquiryEntity entity : boardList) {
-			idList.add(entity.getId());
-		}
-		
-		Boolean flag = (idList.size() > 0) ? true : false ;
-		while(flag) {
-			List<BoardInquiryEntity> subInquiryList = boardInquiryMapper.getBoardInquiryListByParentIdList(idList);
-			if(subInquiryList == null || subInquiryList.size() < 1) {
-				flag = false;
-			} else {
-				idList.clear();
-				for(BoardInquiryEntity entity : subInquiryList) {
-					idList.add(entity.getId());
-					List<BoardInquiryEntity> subList = subInquiryMap.get(entity.getParentId());
-					if(subList == null || subList.size() < 1) {
-						subList = new LinkedList<>();
-					}
-					subList.add(entity);
-					subInquiryMap.put(entity.getParentId(), subList);
-				}
-				
-				for(BoardInquiryEntity entity : boardList) {
-					entity.setSubInquiryList(subInquiryMap.get(entity.getId()));
-				}
-				
-			}
-		}
-		
-		return boardList;
+	public List<InquiryResponse> getBoardInquiryListByType(Integer type, Integer page, Integer size) {
+		return Optional.ofNullable(boardInquiryMapper.getBoardInquiryListByType(type, (page-1) * size, size)).orElseGet(Collections::emptyList)
+					.stream()
+					.map(e -> new InquiryResponse(e))
+					.collect(Collectors.toList());
 	}
 	
 	@Transactional(readOnly = false, isolation = Isolation.REPEATABLE_READ, propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-	public void createBoard(BoardInquiryEntity entity) throws Exception {
+	public void createBoardInquiry(BoardInquiryEntity entity) throws Exception {
 		boardInquiryMapper.createBoardInquiry(entity);
 	}
 	
 	@Transactional(readOnly = false, isolation = Isolation.REPEATABLE_READ, propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-	public void answerBoardInquiry(BoardInquiryEntity entity) throws Exception {
+	public void updateBoardInquiry(BoardInquiryEntity entity) throws Exception {
+		boardInquiryMapper.updateBoardInquiry(entity);
+	}
+	
+	@Transactional(readOnly = false, isolation = Isolation.REPEATABLE_READ, propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+	public void updateAnswerBoardInquiry(BoardInquiryEntity entity) throws Exception {
 		boardInquiryMapper.updateAnswer(entity);
 	}
+	
 }

@@ -1,7 +1,6 @@
 package com.example.domain;
 
 import java.time.ZonedDateTime;
-import java.util.List;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -27,6 +26,4 @@ public class BoardEntity {
 	private Boolean isDel;
 	private ZonedDateTime regDt;
 	private ZonedDateTime modDt; 
-	
-	private List<BoardReplyEntity> replyList;
 }
