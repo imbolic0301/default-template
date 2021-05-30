@@ -40,5 +40,16 @@ public class SignDTO {
 		private String id;
 	}
 	
+
+	/**
+	 * naver 
+	 */
+
+	@Getter
+	@Setter
+	@ToString
+	public static class KakaoUserInfoRequest {
+		private String kakaoId;
+	}
 	
 }

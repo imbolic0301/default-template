@@ -57,4 +57,12 @@ public class SignController {
 		return ResponseEntity.ok().build();
 	}
 	
+	@PostMapping("/kakao")
+	public ResponseEntity<?> kakaoLoginTest(@RequestBody SignDTO.KakaoUserInfoRequest request) throws IOException {
+		// JS SDK로 유저 정보를 확인해서 필요한 정보만 받아오면 끝! 필요한 파라미터는 https://developers.kakao.com/tool/rest-api/open/get/v2-user-me 참조!
+		//
+		System.out.println("request : " + request);
+		return ResponseEntity.ok().build();
+	}
+	
 }

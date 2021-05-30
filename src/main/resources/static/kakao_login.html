@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>카카오 로그인</title>
+</head>
+<body>
+  
+<!-- 카카오 스크립트 -->
+<script src="https://developers.kakao.com/sdk/js/kakao.js"></script>
+  <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+<script>
+Kakao.init('ee82eca0873bffefe0dccdfedd24725f'); //발급받은 키 중 javascript키를 사용해준다.
+console.log(Kakao.isInitialized()); // sdk초기화여부판단
+
+// {“error”:“unauthorized”,“error_description”:“unauthorized - unregistered website domain”}
+//만약 위와 같이 domain 관련 오류가 난다면, 카카오 앱 설정에서 '플랫폼 - Web - 사이트 도메인 설정'을 다시 확인. 
+//개발 중인 경우면 http://127.0.0.1:8080와 같이 포트까지 입력해야 함
+
+
+//카카오로그인
+function kakaoLogin() {
+    Kakao.Auth.login({
+      success: function (response) {
+        Kakao.API.request({
+          url: '/v2/user/me',
+          success: function (response) {
+        	  console.log(response)
+			
+        	  // 실제 서버에서 받을 API에 정보를 담아서 전송
+        	  $.ajax({
+        		    type: 'POST',
+        		    url: '/sign/kakao',
+        		    data: JSON.stringify({
+        		    	kakaoId: response.id
+        		    	}), // or JSON.stringify ({name: 'jonas'}),
+        		    success: function(data) { alert('data: ' + data); },
+        		    contentType: "application/json",
+        		    dataType: 'json'
+        		});
+          },
+          fail: function (error) {
+            console.log(error)
+          },
+        })
+      },
+      fail: function (error) {
+        console.log(error)
+      },
+    })
+  }
+//카카오로그아웃  
+function kakaoLogout() {
+    if (Kakao.Auth.getAccessToken()) {
+      Kakao.API.request({
+        url: '/v1/user/unlink',
+        success: function (response) {
+        	console.log(response)
+        },
+        fail: function (error) {
+          console.log(error)
+        },
+      })
+      Kakao.Auth.setAccessToken(undefined)
+    }
+  }  
+</script>
+<ul>
+	<li onclick="kakaoLogin();">
+      <a href="javascript:void(0)">
+          <span>카카오 로그인</span>
+      </a>
+	</li>
+	<li onclick="kakaoLogout();">
+      <a href="javascript:void(0)">
+          <span>카카오 로그아웃</span>
+      </a>
+	</li>
+</ul>
+
+</body>
+</html>
