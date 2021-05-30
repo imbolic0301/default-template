@@ -10,7 +10,6 @@ import com.example.TemplateProjectApplication;
 
 
 @Configuration
-@ComponentScan(basePackageClasses = TemplateProjectApplication.class)
 @EntityScan("com.example.domain")
 @MapperScan({"com.example.mapper"})
 @EnableTransactionManagement
