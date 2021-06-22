@@ -11,10 +11,11 @@
   <div id="naver_id_login"></div>
   <!-- //네이버아이디로로그인 버튼 노출 영역 -->
   <script type="text/javascript">
-	var naver_id_login = new naver_id_login("rO7LP_0dOv7BkM7xTEQL", "http://127.0.0.1:8080/naver_callback.html");
+	var naver_id_login = new naver_id_login("rO7LP_0dOv7BkM7xTEQL", "http://127.0.0.1:8080/naver_.html");
   	//var naver_id_login = new naver_id_login("YOUR_CLIENT_ID", "YOUR_CALLBACK_URL");
   	var state = naver_id_login.getUniqState();
-  	naver_id_login.setButton("white", 2,40);
+  	/* naver_id_login.setButton("white", 2,40); */
+  	naver_id_login.setButton("green", 3,40);
   	naver_id_login.setDomain("http://127.0.0.1");
   	naver_id_login.setState(state);
   	naver_id_login.init_naver_id_login();
